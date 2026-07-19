@@ -9,11 +9,6 @@
       @mouseleave="hover = null"
     ></canvas>
     <transition name="fade">
-      <div v-if="store.forcedSkill && store.isMyTurn && store.turnPhase === 'skill'" class="forced-banner">
-        ⚡ 技能回合！请从右侧释放一个技能
-      </div>
-    </transition>
-    <transition name="fade">
       <div v-if="aiThinking" class="ai-banner">🤖 AI 思考中…</div>
     </transition>
   </div>
@@ -186,21 +181,7 @@ canvas {
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 0 6px #2a2c47, 0 0 0 8px #3d2f1c;
   cursor: pointer;
 }
-.forced-banner {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, #ff69b4, #ff8c00);
-  color: #fff;
-  font-weight: 700;
-  padding: 8px 22px;
-  border-radius: 999px;
-  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.5);
-  animation: pulse 1s ease-in-out infinite;
-  white-space: nowrap;
-  pointer-events: none;
-}
+
 .ai-banner {
   position: absolute;
   top: 14px;

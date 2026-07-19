@@ -40,7 +40,6 @@ export const useGameStore = defineStore('game', {
     diceValue: null,
     turnPhase: 'roll',          // roll | move | skill | move_or_skill
     drawnCard: null,
-    forcedSkill: false,
     diceRolling: false,
     cardOverlay: false,
     // 技能选择
@@ -56,17 +55,11 @@ export const useGameStore = defineStore('game', {
     isMyTurn(s) { return !!s.color && s.currentTurn === s.color && !s.winner },
     mySkills(s) { return s.skillsRemaining[s.color] || {} },
     opponentInfo(s) { return s.players.find(p => p.color !== s.color) || null },
-    stepsUntilForced(s) {
-      if (s.stepCount === 0) return 5
-      const r = s.stepCount % 5
-      return r === 0 ? 0 : 5 - r
-    },
     phaseText(s) {
       if (s.winner) return '对局结束'
       switch (s.turnPhase) {
         case 'roll': return '🎲 掷骰阶段'
         case 'move': return '♟️ 落子阶段'
-        case 'skill': return '⚡ 强制技能回合'
         case 'move_or_skill': return '🃏 落子 / 使用卡牌'
         default: return ''
       }
@@ -76,7 +69,6 @@ export const useGameStore = defineStore('game', {
     },
     canUseSkill() {
       return this.isMyTurn
-        && (this.turnPhase === 'skill' || this.turnPhase === 'move_or_skill')
         && this.peaceRounds === 0
         && !this.silenced[this.color]
     },
@@ -163,7 +155,6 @@ export const useGameStore = defineStore('game', {
       this.winner = data.winner
       this.winReason = data.win_reason
       this.turnPhase = data.turn_phase
-      this.forcedSkill = data.forced_skill
       this.players = data.players || []
       this.immune = data.immune || { B: false, W: false }
       this.silenced = data.silenced || { B: false, W: false }
@@ -222,7 +213,6 @@ export const useGameStore = defineStore('game', {
         return
       }
       if (this.turnPhase === 'roll') { this.showToast('请先掷骰 🎲', 'error'); return }
-      if (this.turnPhase === 'skill') { this.showToast('⚡ 强制技能回合：请使用技能', 'error'); return }
       if (!this.canPlaceStone) return
       socket && socket.send({ type: 'move', data: { x, y } })
     },

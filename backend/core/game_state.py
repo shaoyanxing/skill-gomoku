@@ -16,7 +16,7 @@ class GameState:
         self.current_turn = "B"
         self.step_count = 0
         self.warnings = {"B": 0, "W": 0}
-        self.skill_usage = {"B": {}, "W": {}}      # 已用次数 {color: {skill: n}}
+        self.skill_usage = {"B": {s.value: se.SKILL_LIMITS[s] for s in SkillName}, "W": {s.value: se.SKILL_LIMITS[s] for s in SkillName}}  # 全部已用完，靠抽卡获得临时次数
         self.bonus_uses = {"B": {}, "W": {}}        # 抽卡获得的临时次数（当回合有效）
         self.frozen_zones: List[dict] = []
         self.ban_zones: List[dict] = []
@@ -30,7 +30,6 @@ class GameState:
         self.dice_value: Optional[int] = None
         self.turn_phase = "roll"                    # roll | move | skill | move_or_skill
         self.drawn_card: Optional[str] = None
-        self.forced_skill = False
         self.events: List[dict] = []
 
     # ---------------------------------------------------------- 工具
@@ -67,7 +66,6 @@ class GameState:
             for z in self.ban_zones
         )
 
-    def forced_skill_round(self) -> bool:
         return self.step_count > 0 and self.step_count % 5 == 0
 
     # ---------------------------------------------------------- 技能次数
@@ -102,19 +100,10 @@ class GameState:
         if self.turn_phase != "roll" or self.winner:
             return False
         self.dice_value = random.randint(1, 6)
-        self.forced_skill = self.forced_skill_round()
         odd = self.dice_value % 2 == 1
         if not odd:
             self.drawn_card = self.draw_card(self.current_turn)
-        if self.forced_skill:
-            # 强制技能回合优先于骰子结果
-            if self.has_any_skill(self.current_turn):
-                self.turn_phase = "skill"
-            else:
-                self.turn_phase = "move"
-                self.emit("技能次数耗尽，强制技能回合转为普通落子", "info")
-        else:
-            self.turn_phase = "move" if odd else "move_or_skill"
+        self.turn_phase = "move" if odd else "move_or_skill"
         return True
 
     # ---------------------------------------------------------- 落子
@@ -125,8 +114,6 @@ class GameState:
             return {"ok": False, "msg": "还没轮到你"}
         if self.turn_phase == "roll":
             return {"ok": False, "msg": "请先掷骰 🎲"}
-        if self.turn_phase == "skill":
-            return {"ok": False, "msg": "⚡ 强制技能回合：必须释放一个技能！"}
         if not se.in_board(x, y) or self.board[y][x]:
             return {"ok": False, "msg": "该位置不可落子"}
         if self.is_frozen(x, y):
@@ -211,7 +198,6 @@ class GameState:
         self.turn_phase = "roll"
         self.dice_value = None
         self.drawn_card = None
-        self.forced_skill = False
         self.frozen_zones = [z for z in self.frozen_zones if z["expire_step"] > self.step_count]
         self.ban_zones = [z for z in self.ban_zones if z["expire_step"] > self.step_count]
         self.bonus_uses = {"B": {}, "W": {}}  # 未使用的抽卡当回合作废
@@ -233,7 +219,6 @@ class GameState:
             "dice_value": self.dice_value,
             "turn_phase": self.turn_phase,
             "drawn_card": self.drawn_card,
-            "forced_skill": self.forced_skill,
             "immune": {c: self.is_immune(c) for c in ("B", "W")},
             "silenced": {c: self.is_silenced(c) for c in ("B", "W")},
         }
