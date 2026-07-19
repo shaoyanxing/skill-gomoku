@@ -3,8 +3,9 @@ import axios from 'axios'
 import { GameSocket } from '../utils/websocket'
 import { SKILL_MAP } from '../utils/skills'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-const WS_BASE = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/gomoku'
+const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+const WS_BASE = import.meta.env.VITE_WS_BASE_URL || `${wsProto}//${window.location.host}/gomoku`
 
 const emptyBoard = () => Array.from({ length: 15 }, () => Array(15).fill(''))
 
