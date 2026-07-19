@@ -89,9 +89,8 @@ class GameState:
 
     # ---------------------------------------------------------- 骰子
     def draw_card(self, color: str) -> Optional[str]:
-        pool = [s for s in SkillName if se.SKILL_LIMITS[s] - self.skill_usage[color].get(s.value, 0) > 0]
-        if not pool:
-            return None
+        # 所有技能都可抽，不限制次数
+        pool = list(SkillName)
         card = random.choice(pool)
         self.bonus_uses[color][card.value] = self.bonus_uses[color].get(card.value, 0) + 1
         return card.value
