@@ -10,7 +10,7 @@
 
 技能不继承、每个技能有限使用次数，用完即止。
 
-在线试玩：(blog.shaoyanxing.top)[https://blog.shaoyanxing.top/gomoku/]
+在线试玩：[blog.shaoyanxing.top](https://blog.shaoyanxing.top/gomoku/)
 
 ## 技术栈
 
