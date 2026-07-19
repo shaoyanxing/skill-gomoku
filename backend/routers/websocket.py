@@ -94,8 +94,6 @@ async def handle_action(room: Room, player_id: str, mtype: str, data: dict, ws: 
         if game.roll_dice():
             odd = game.dice_value % 2 == 1
             game.emit(f"🎲 {player.name} 掷出 {game.dice_value} 点（{'单数落子' if odd else '双数抽卡'}）", "dice")
-            if game.forced_skill:
-                game.emit("⚡ 强制技能回合！", "warning")
             if game.drawn_card:
                 game.emit(f"🃏 抽到技能卡【{game.drawn_card}】，本回合可额外使用一次", "card")
             await sync_room(room)
